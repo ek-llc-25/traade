@@ -3,4 +3,6 @@ project(traade C)
 
 set(CMAKE_C_STANDARD 23)
 
-add_executable(traade main.c)
+add_executable(traade main.c
+        deadlock.c
+        deadlock.h)

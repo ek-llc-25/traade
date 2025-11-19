@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <pthread.h>
 
+#include "deadlock.h"
+
+// Det her var første trådfunktion vi arbejdede med
 void *my_thread_function(void *arg) {
     // Stack-framen for trådfunktionen bliver frigjort når tråden stopper
     // Men hukommelsen som tråden har adgang til er delt med resten af processen
@@ -20,6 +23,8 @@ struct payload {
 int counter = 0;
 pthread_mutex_t counter_mutex = PTHREAD_MUTEX_INITIALIZER;
 
+// Det her var anden trådfunktion vi arbejdede med
+// Den var ikke så heldig, fordi der opstod race conditions
 void *counter_thread(void *arg) {
     struct payload *payload = (struct payload *) arg;
 
@@ -29,6 +34,8 @@ void *counter_thread(void *arg) {
     }
 }
 
+// Det her var tredje trådfunktion vi arbejdede med
+// Den fikser race conditions med en mutex (mutual exclusion / lås)
 void *safe_counter_thread(void *arg) {
     struct payload *payload = (struct payload *) arg;
 
@@ -72,8 +79,25 @@ int main(void) {
     pthread_join(b_traad, NULL);
 
     pthread_mutex_destroy(&counter_mutex);
-
     printf("Done! counter = %d\n", counter);
+
+    // Gul bil-eksperimentet
+    pthread_t c_traad;
+    pthread_t d_traad;
+
+    printf("Gul bil eksperiment starter nu!\n");
+
+    pthread_create(&c_traad, NULL, gul_bil_thread_c, "gul bil");
+    pthread_create(&d_traad, NULL, gul_bil_thread_d, "gul bil");
+
+    printf("Spillerne har observeret gule biler!\n");
+
+    pthread_join(c_traad, NULL);
+    pthread_join(d_traad, NULL);
+
+    printf("Vinderen var %c...\n", get_winner());
+
+    printf("Så, nu er den gule bil kørt væk, stop med at larme!\n");
 
     return 0;
 }
