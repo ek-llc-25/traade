@@ -1,6 +1,9 @@
 #include "deadlock.h"
 #include <pthread.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <time.h>
 
 char gul_bil_captured_by = 'X';
 pthread_mutex_t gul_bil_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -12,8 +15,9 @@ char get_winner() {
 
 void *gul_bil_thread_c(void *arg) {
     char *str = (char *) arg;
+    usleep((rand() % 101) * 1000);
+    pthread_mutex_lock(&gul_bil_mutex);
     if (gul_bil_captured_by == 'X') {
-        pthread_mutex_lock(&gul_bil_mutex);
         printf("[C] %s!\n", str);
         pthread_mutex_lock(&gul_bil_stop_mutex);
         printf("[C] Stop!\n");
@@ -27,8 +31,9 @@ void *gul_bil_thread_c(void *arg) {
 
 void *gul_bil_thread_d(void *arg) {
     char *str = (char *) arg;
+    usleep((rand() % 101) * 1000);
+    pthread_mutex_lock(&gul_bil_mutex);
     if (gul_bil_captured_by == 'X') {
-        pthread_mutex_lock(&gul_bil_mutex);
         printf("[D] %s!\n", str);
         pthread_mutex_lock(&gul_bil_stop_mutex);
         printf("[D] Stop!\n");
